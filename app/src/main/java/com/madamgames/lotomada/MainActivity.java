@@ -1,19 +1,23 @@
 package com.madamgames.lotomada;
 
-import android.app.Activity; import android.os.Bundle; import android.graphics.Color; import android.view.Gravity; import android.widget.*;
+import android.app.Activity;import android.os.Bundle;import android.graphics.Color;import android.view.Gravity;import android.widget.*;import android.content.SharedPreferences;
 
-public class MainActivity extends Activity {
-  private LotoGame game; private TextView numbers;
-  @Override public void onCreate(Bundle b){super.onCreate(b); build(); reset();}
-  private void build(){
-    LinearLayout root=new LinearLayout(this); root.setOrientation(LinearLayout.VERTICAL); root.setGravity(Gravity.CENTER); root.setPadding(25,30,25,25);
-    TextView title=new TextView(this); title.setText("LotoMada · 1–90"); title.setTextSize(27); title.setTextColor(Color.DKGRAY);
-    numbers=new TextView(this); numbers.setTextSize(19); numbers.setGravity(Gravity.CENTER); numbers.setPadding(0,20,0,20);
-    Button ticket=new Button(this); ticket.setText("Nouveau ticket (5)"); Button draw=new Button(this); draw.setText("Tirer 5 numéros"); Button reset=new Button(this); reset.setText("Réinitialiser");
-    root.addView(title); root.addView(numbers); root.addView(ticket); root.addView(draw); root.addView(reset); setContentView(root);
-    ticket.setOnClickListener(v->{game.newTicket(5); showTicket();}); draw.setOnClickListener(v->{try{game.draw(5); showDraw();}catch(Exception e){Toast.makeText(this,"Créez d'abord un ticket",Toast.LENGTH_SHORT).show();}}); reset.setOnClickListener(v->reset());
-  }
-  private void reset(){game=new LotoGame(); numbers.setText("Aucun ticket");}
-  private void showTicket(){numbers.setText("Ticket: "+game.ticket()+"\nPrêt pour le tirage");}
-  private void showDraw(){numbers.setText("Ticket: "+game.ticket()+"\nTirage: "+game.draw()+"\nCorrespondances: "+game.matches()+"/5");}
+public class MainActivity extends Activity{
+ private LotoGame game;private TextView numbers;private SharedPreferences prefs;
+ @Override public void onCreate(Bundle b){super.onCreate(b);prefs=getSharedPreferences("loto",0);build();if(!restore())reset();}
+ private TextView label(String text,int size){TextView v=new TextView(this);v.setText(text);v.setTextSize(size);v.setGravity(Gravity.CENTER);v.setPadding(0,10,0,10);return v;}
+ private void build(){
+  LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setGravity(Gravity.CENTER_HORIZONTAL);root.setPadding(24,28,24,18);
+  TextView title=label("LotoMada · 1–90",27);title.setTextColor(Color.DKGRAY);numbers=label("",18);
+  Button ticket=new Button(this);ticket.setText("Nouveau ticket (5)");Button draw=new Button(this);draw.setText("Tirer 5 numéros");Button reset=new Button(this);reset.setText("Réinitialiser");
+  root.addView(title);root.addView(numbers);root.addView(ticket);root.addView(draw);root.addView(reset);setContentView(root);
+  ticket.setOnClickListener(v->{game.newTicket(5);persist();show();});
+  draw.setOnClickListener(v->{try{game.draw(5);persist();show();}catch(Exception e){Toast.makeText(this,"Créez d'abord un ticket",Toast.LENGTH_SHORT).show();}});
+  reset.setOnClickListener(v->{reset();persist();});
+ }
+ private void reset(){game=new LotoGame();show();}
+ private boolean restore(){String s=prefs.getString("state","");if(s.isEmpty())return false;game=new LotoGame();if(game.loadState(s)){show();return true;}return false;}
+ private void persist(){prefs.edit().putString("state",game.saveState()).apply();}
+ private void show(){if(game.ticket().isEmpty())numbers.setText("Aucun ticket\nCréez un ticket pour commencer");else{String draw=game.draw().isEmpty()?"Aucun tirage":"Tirage: "+game.draw();numbers.setText("Ticket: "+game.ticket()+"\n"+draw+"\nCorrespondances: "+game.matches()+"/5");}}
+ @Override protected void onStop(){super.onStop();if(game!=null)persist();}
 }
