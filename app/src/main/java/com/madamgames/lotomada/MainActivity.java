@@ -7,8 +7,8 @@ public class MainActivity extends Activity{
  @Override public void onCreate(Bundle b){super.onCreate(b);prefs=getSharedPreferences("loto",0);build();if(!restore())reset();}
  private TextView label(String text,int size){TextView v=new TextView(this);v.setText(text);v.setTextSize(size);v.setGravity(Gravity.CENTER);v.setPadding(0,10,0,10);return v;}
  private void build(){
-  LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setGravity(Gravity.CENTER_HORIZONTAL);root.setPadding(24,28,24,18);
-  TextView title=label("LotoMada · 1–90",27);title.setTextColor(Color.DKGRAY);numbers=label("",18);
+  LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setGravity(Gravity.CENTER_HORIZONTAL);root.setPadding(20,22,20,16);
+  TextView title=label("LotoMada · 1–90",27);title.setTextColor(Color.rgb(35,45,55));numbers=label("",18);
   Button ticket=new Button(this);ticket.setText("Nouveau ticket (5)");Button draw=new Button(this);draw.setText("Tirer 5 numéros");Button reset=new Button(this);reset.setText("Réinitialiser");
   root.addView(title);root.addView(numbers);root.addView(ticket);root.addView(draw);root.addView(reset);setContentView(root);
   ticket.setOnClickListener(v->{game.newTicket(5);persist();show();});
